@@ -1,20 +1,23 @@
 #include <iostream>
 #include <string.h>
-#include <conio.h>
-#include <stdio.h>
 #define max 10
-using namespace std;
 
-struct Tumpuk
-{
-	int top;
-	string namaka[max];
-	string tujuan[max];
-	string berangkat[max];
-	string tiba[max];
-	string kelas[max];
-	float harga[max];
-	int kursi[max];
+using namespace std;
+    
+struct KA{   
+    string id;
+    string nama;
+    string tujuan;
+	string berangkat;
+	string tiba;
+	string kelas;
+	float harga;
+	int kursi;
+};
+
+struct Tumpuk{
+    int top;
+    KA idKA[max];
 }T;
 
 void awal()
@@ -43,14 +46,15 @@ void input(string namaka, string tujuan, string berangkat, string tiba, string k
 	if(kosong() == 1 || penuh() == 0)
 	{
 		T.top++;
-		T.namaka[T.top] = namaka;
-		T.tujuan[T.top] = tujuan;
-		T.berangkat[T.top] = berangkat;
-		T.tiba[T.top] = tiba;
-		T.kelas[T.top] = kelas;
-		T.harga[T.top] = harga;
-		T.kursi[T.top] = kursi;
-		cout << "\nJadwal kereta api " << T.namaka[T.top] << " berhasil diinput!" << endl;
+		T.idKA[T.top].id = T.top;
+		T.idKA[T.top].nama = namaka;
+		T.idKA[T.top].tujuan = tujuan;
+		T.idKA[T.top].berangkat = berangkat;
+		T.idKA[T.top].tiba = tiba;
+		T.idKA[T.top].kelas = kelas;
+		T.idKA[T.top].harga = harga;
+		T.idKA[T.top].kursi = kursi;
+		cout << "\nJadwal kereta api " << T.idKA[T.top].nama << " berhasil diinput!" << endl;
 	}
 	else
 		cout << "Jadwal sudah melewati batas maksimum!";
@@ -67,8 +71,8 @@ void tampil()
 		cout << "\nKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
 		for(int i=T.top; i >= 0; i--)
 		{
-			cout << T.namaka[i] << "\t\t" << T.tujuan[i] << "\t\t" << T.berangkat[i] << "\t\t" << T.tiba[i] << "\t\t";
-			cout << T.kelas[i] << "\t\t" << T.harga[i] << "\t\t" << T.kursi[i] << endl;
+			cout << T.idKA[i].nama << "\t\t" << T.idKA[i].tujuan << "\t\t" << T.idKA[i].berangkat << "\t\t" << T.idKA[i].tiba << "\t\t";
+			cout << T.idKA[i].kelas << "\t\t" << T.idKA[i].harga << "\t\t" << T.idKA[i].kursi << endl;
 		}
 		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
 	}
