@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string.h>
+#include <conio.h>
+#include <windows.h>
+#include <cstdlib>
 #define max 10
 
 using namespace std;
@@ -17,7 +20,7 @@ struct KA{
 
 struct Tumpuk{
     int top;
-    KA idKA[max];
+    struct KA idKA[max];
 }T;
 
 void awal()
@@ -41,23 +44,34 @@ int penuh()
 		return 0;
 }
 
-void input(string namaka, string tujuan, string berangkat, string tiba, string kelas, float harga, int kursi)
+void input(string nama, string tujuan, string berangkat, string tiba, string kelas, float harga, int kursi)
 {
 	if(kosong() == 1 || penuh() == 0)
 	{
 		T.top++;
 		T.idKA[T.top].id = T.top;
-		T.idKA[T.top].nama = namaka;
+		T.idKA[T.top].nama = nama;
 		T.idKA[T.top].tujuan = tujuan;
 		T.idKA[T.top].berangkat = berangkat;
 		T.idKA[T.top].tiba = tiba;
 		T.idKA[T.top].kelas = kelas;
 		T.idKA[T.top].harga = harga;
 		T.idKA[T.top].kursi = kursi;
-		cout << "\nJadwal kereta api " << T.idKA[T.top].nama << " berhasil diinput!" << endl;
+		cout << "\nJadwal kereta api " << T.idKA[T.top].nama << " berhasil diinput!\n" << endl;
 	}
 	else
 		cout << "Jadwal sudah melewati batas maksimum!";
+}
+
+void hapus()
+{
+	if(kosong() == 0)
+	{
+		cout << "Jadwal kereta " << T.idKA[T.top].nama << " berhasil dihapus !" << endl;
+		T.top--;
+	}
+	else
+		cout << "Tidak ada jadwal kereta api!\n\n";
 }
 
 void tampil()
@@ -80,14 +94,158 @@ void tampil()
 		cout << "Tidak ada jadwal kereta api!\n\n";
 }
 
+void bersih()
+{
+	T.top = -1;
+	cout << "Semua jadwal berhasil dibersihkan !" << endl;
+}
+
 void pembuka(string user)
 {
 	system("cls");
 	cout << "Login berhasil !" << endl;
-	cout << "Selamat datang di aplikasi KAI Access. Anda login sebagai " << user << endl;
-	cout << "Menu yang tersedia :" << endl;
+	cout << "Selamat datang di aplikasi KAI Access. Anda login sebagai " << user << "\n\n";
+	cout << "Menu yang tersedia :";
 }
 
+void sorting()
+{
+	struct Temp_KA
+	{
+		string id;
+    	string nama;
+    	string tujuan;
+		string berangkat;
+		string tiba;
+		string kelas;
+		float harga;
+		int kursi;
+	};
+
+	struct Temp_Tumpuk
+	{
+		int top;
+    	struct Temp_KA TidKA[max];
+	} TE;
+
+	TE.top = -1;
+	for(int i=0; i <= T.top; i++)
+	{
+		TE.top++;
+		TE.TidKA[i].id = T.idKA[i].id;
+		TE.TidKA[i].nama = T.idKA[i].nama;
+		TE.TidKA[i].tujuan = T.idKA[i].tujuan;
+		TE.TidKA[i].berangkat = T.idKA[i].berangkat;
+		TE.TidKA[i].tiba = T.idKA[i].tiba;
+		TE.TidKA[i].kelas = T.idKA[i].kelas;
+		TE.TidKA[i].harga = T.idKA[i].harga;
+		TE.TidKA[i].kursi = T.idKA[i].kursi;
+	}
+
+	int pil;
+	cout << "\nUrutkan berdasarkan : ";
+	cout << "\n[1] Keberangkatan Terpagi\n[2] Harga Termurah\n\nPilihan anda : "; cin >> pil;
+	int index[max];
+	for(int i=0; i <= T.top; i++)
+	{
+		index[i] = i;
+	}
+
+	if(pil == 1)
+	{
+		for(int i=1; i <= T.top; i++)
+		{
+			for(int j=0; j <= T.top - i; j++)
+			{
+				if(TE.TidKA[j].berangkat < TE.TidKA[j + 1].berangkat)
+				{
+					int temp;
+					temp = index[j];
+					index[j] = index[j+1];
+					index[j+1] = temp;
+				}
+			}
+			
+		}
+		for(int i=T.top; i >= 0; i--)
+		{
+			cout << TE.TidKA[index[i]].berangkat << endl;
+		}
+	}
+	/*else if(pil == 2)
+	{
+		for(int i=1; i < TE.top; i++)
+		{
+			for(int j=0; j <= TE.top - i; j++)
+			{
+				if(TE.TidKA[j].harga < TE.TidKA[j + 1].harga)
+				{
+					int temp;
+					temp = index[j];
+					index[j] = index[j+1];
+					index[j+1] = temp;
+				}
+			}
+		}
+	}
+	else
+	{
+		cout << "Angka yang anda input tidal valid !" << endl;
+	}
+
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	cout << "\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
+	cout << "\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	cout << "\nKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
+	for(int i=T.top; i >= 0 ; i--)
+	{
+			cout << TE.TidKA[index[i]].nama << "\t\t" << TE.TidKA[index[i]].tujuan << "\t\t" << TE.TidKA[index[i]].berangkat << "\t\t" << TE.TidKA[index[i]].tiba << "\t\t";
+			cout << TE.TidKA[index[i]].kelas << "\t\t" << TE.TidKA[index[i]].harga << "\t\t" << TE.TidKA[index[i]].kursi << endl;
+	}
+	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	*/
+}
+
+void searching()
+{
+	string tujuan;
+	int j=0;
+	int index[max];
+
+	cout << "\nMasukkan stasiun tujuan : ";
+	cin >> tujuan;
+	
+	for(int i=0; i <= T.top; i++)
+	{
+		if(T.idKA[i].tujuan == tujuan)
+		{
+			index[j] = i;
+			j++;
+		}
+	}
+	if(j > 0)
+	{
+		cout << "Terdapat " << j << " jadwal keberangkatan ke " << tujuan << "\n\n";
+		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+		cout << "\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
+		cout << "\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
+		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+		cout << "\nKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
+		for(int i=0; i < j ; i++)
+		{
+			cout << T.idKA[index[i]].nama << "\t\t" << T.idKA[index[i]].tujuan << "\t\t" << T.idKA[index[i]].berangkat << "\t\t" << T.idKA[index[i]].tiba << "\t\t";
+			cout << T.idKA[index[i]].kelas << "\t\t" << T.idKA[index[i]].harga << "\t\t" << T.idKA[index[i]].kursi << endl;
+		}
+		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
+	}
+	else
+	{
+		cout << "\nTidak ada jadwal keberangkatan kereta api ke " << tujuan << " !" << endl;
+	}
+}
+
+void login();
 void admin()
 {	
 	pembuka("admin");
@@ -97,14 +255,15 @@ void admin()
 	float harga;
 	do
 	{
-		cout << "1. Input\n2. Hapus\n3. Tampil\n4. Bersihkan\n";
-		cout << "5. Keluar\n\nMasukkan pilihan : ";
+		cout << "\n1. Input Jadwal\n2. Hapus Jadwal Teratas\n3. Tampilkan Jadwal\n4. Reset Jadwal\n";
+		cout << "5. Sorting Jadwal\n6. Cari Jadwal\n7. Logout\n8. Keluar\n\nMasukkan pilihan : ";
 		cin >> pil;
 
 		switch(pil)
 		{
 			case 1 :
 				cout << "Lengkapi data berikut !" << endl;
+				cout << "-----------------------------------------------\n";
 				cout << "Nama KAI/ID                 : "; cin >> namaka;
 				cout << "Stasiun Tujuan              : "; cin >> tujuan;
 				cout << "Waktu Berangkat             : "; cin >> berangkat;
@@ -115,19 +274,57 @@ void admin()
 				input(namaka, tujuan, berangkat, tiba, kelas, harga, kursi);
 				break;
 			case 2 :
+				hapus();
+				break;
 			case 3 :
 				tampil();
 				break;
 			case 4 :
+				bersih();
+				break;
+			case 5 :
+				sorting();
+				break;
+			case 6 :
+				searching();
+				break;
+			case 7 :
+				login();
+				break;
 			default :
-				cout << "Terimakasih telah menggunakan layanan KAI Access";
+				cout << "Terimakasih telah menggunakan layanan KAI Access\n";
+				exit(0);
 		}
-	} while(pil != 5);
+	} while(pil != 8 && pil > 0 && pil < 9);
 }
 
 void other()
 {
+	pembuka("user");
+	int pil;
+	do
+	{
+		cout << "\n1. Cari Jadwal\n2. Sorting Jadwal\n3. Booking\n";
+		cout << "4. Logout\n5. Keluar\n\nMasukkan pilihan : ";
+		cin >> pil;
 
+		switch(pil)
+		{
+			case 1 :
+				searching();
+				break;
+			case 2 :
+			case 3 :
+				
+				break;
+			case 4 :
+				login();
+				break;
+			default :
+				cout << "Terimakasih telah menggunakan layanan KAI Access\n";
+				exit(0);
+		}
+	} while(pil != 5 && pil > 0 && pil < 6);
 }
 
 void login()
@@ -170,6 +367,8 @@ void login()
 
 int main()
 {
+	SetConsoleTitle(TEXT("KAI ACCESS STASIUN TUGU YOGYAKARTA"));
 	login();
+	//getch();
 	return 0;
 }
