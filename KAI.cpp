@@ -8,10 +8,11 @@
 
 using namespace std;
     
+// daftar rangkaian kereta api
 struct KA{   
-    int id;
-    string nama;
-    string tujuan;
+	int id;
+	string nama;
+	string tujuan;
 	string berangkat;
 	string tiba;
 	string kelas;
@@ -20,8 +21,8 @@ struct KA{
 };
 
 struct Tumpuk{
-    int top;
-    struct KA idKA[max];
+	int top;
+	struct KA idKA[max];
 }T;
 
 // menyiapkan struct untuk pertama kali
@@ -96,7 +97,10 @@ void hapus()
 	{
 		cout << "Jadwal kereta " << T.idKA[T.top].nama << " berhasil dihapus !" << endl;
 		T.top--;
-		for(int i=0; i < B.top; i++)
+		
+		// stack diakses dari indeks terbesar. gak ngaruh disini, tapi yah, gitu.
+		// dibawah juga banyak yang sama.
+		for(int i = B.top; i >= 0; i--)
 		{
 			if(B.dB[i].namaKA == T.idKA[T.top].nama)
 			{
@@ -144,7 +148,11 @@ void tampil()
 // mengosongkan struct/reset struct
 void bersih()
 {
-	T.top = -1;
+	// pakai aja fungsi hapus yang sudah ada.
+	for(int i = T.top; i >= 0; i--){
+		hapus();
+		T.top--;
+	}
 	cout << "Semua jadwal berhasil dibersihkan !" << endl;
 }
 
@@ -154,8 +162,8 @@ void sorting(int pil)
 	struct Temp_KA
 	{
 		int id;
-    	string nama;
-    	string tujuan;
+		string nama;
+		string tujuan;
 		string berangkat;
 		string tiba;
 		string kelas;
