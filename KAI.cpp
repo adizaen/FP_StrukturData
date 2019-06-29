@@ -515,19 +515,20 @@ void booking()
 	cin >> inputTujuan;
 
 	//Mengecek keberangkatan dengan tujuan yang sesuai dengan input user
-	int totalKeberangkatan = 0;
-	int keberangkatan[max];
+	int totalKeberangkatan = 0; //Counter posisi pada stack KA
+	int keberangkatan[max]; //Penyimpan posisi pada stack yang sesuai dengan input
 	for (int i = 0; i <= KA.top; i++)
 	{
 		if (KA.KeretaApi[i].tujuan == inputTujuan)
 		{
-			keberangkatan[totalKeberangkatan] = i;
-			totalKeberangkatan++;
+			keberangkatan[totalKeberangkatan] = i; //Menyimpan posisi stack KA pada array
+			totalKeberangkatan++; //Total keberangkatan dengan tujuan yang sama bertambah
 		}
 	}
 
 	if (totalKeberangkatan > 0)
 	{
+		//Output semua keberangkatan yang berhasil ditemukan yang sesuai input
 		cout << "\nTerdapat " << totalKeberangkatan << " jadwal keberangkatan ke " << inputTujuan << "\n\n";
 		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
 		cout << "\t\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
@@ -547,6 +548,7 @@ void booking()
 		}
 		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
 
+		//Input user memilih salah satu keberangkatan
 		int pil;
 		do
 		{
@@ -559,6 +561,7 @@ void booking()
 			}
 		} while (pil == NULL);
 
+		//Memesan tiket booking sesuai pilihan
 		if (pil != NULL)
 		{
 			cout << "\nAnda memilih kereta api " << KA.KeretaApi[keberangkatan[pil - 1]].nama << " dengan tujuan " << KA.KeretaApi[keberangkatan[pil - 1]].tujuan << endl;
@@ -566,18 +569,18 @@ void booking()
 			do
 			{
 				cout << "Jumlah kursi yang anda pesan : ";
-				cin >> jumlahKursi;
+				cin >> jumlahKursi; //Input jumlah kursi yang ingin dipesan
 
-				if (jumlahKursi > 0)
+				if (jumlahKursi > 0 && jumlahKursi < KA.KeretaApi[keberangkatan[pil - 1]].kursi)
 				{
-					headBooking->next_kodebooking = headBooking;
+					//Buat objek struct sebagai penyimpanan sementara yang nanti akan dipindah ke headBooking
+					KodeBooking *tempBooking = new KodeBooking; 
 
-					KodeBooking *tempBooking = new KodeBooking;
+					tempBooking->kodeBooking = "XL2411P"; //Generate kode booking
+					tempBooking->idKA = KA.KeretaApi[keberangkatan[pil - 1]].id; //Menyimpan idKA
+					tempBooking->kursiDipesan = jumlahKursi; //Menyimpan jumlah kursi
 
-					tempBooking->kodeBooking = "XL2411P";
-					tempBooking->idKA = KA.KeretaApi[keberangkatan[pil - 1]].id;
-					tempBooking->kursiDipesan = jumlahKursi;
-
+					//Output detail pemesanan tiket
 					cout << "\n";
 					cout << "------------------------------------------------" << endl;
 					cout << "\tFormulir Pemesanan Tiket KAI" << endl;
@@ -591,23 +594,37 @@ void booking()
 					cout << "Waktu Tiba\t: " << KA.KeretaApi[tempBooking->idKA].tiba << endl;
 					cout << "Kelas\t\t: " << KA.KeretaApi[tempBooking->idKA].kelas << endl;
 					cout << "------------------------------------------------" << endl;
-
-					for (int i = 1; i <= tempBooking->kursiDipesan; i++)
+					
+					//Buat objek struct yang akan menyimpan posisi pembacaan dari struct penumpang yang ada pada tempBooking
+					DetailPenumpang *currPenumpang = new DetailPenumpang;
+					//Inisiasi objek struct penumpang yang ada pada tempBooking
+					tempBooking->penumpang = new DetailPenumpang;
+					//Posisi awal currPenumpang = tempBooking->penumpang = head dari objek struct penumpang
+					currPenumpang = tempBooking->penumpang;
+					for (int i = 0; i < jumlahKursi; i++)
 					{
-						DetailPenumpang* tempPenumpang = new DetailPenumpang;
-
+						//Melakukan imput data ke dalam struct yang posisinya sekarang sudah disimpan di currPenumpang
 						cout << "\nData Penumpang ke - " << i << endl;
-						cout << "Masukkan NIK\t: "; cin >> tempPenumpang->nikPenumpang;
-						cout << "Masukkan Nama\t: "; cin >> tempPenumpang->namaPenumpang;
+						cout << "Masukkan NIK\t: "; cin >> currPenumpang->nikPenumpang;
+						cout << "Masukkan Nama\t: "; cin >> currPenumpang->namaPenumpang;
 
-						tempBooking->penumpang = tempPenumpang;
-						if (i < tempBooking->kursiDipesan) {
-							tempBooking->penumpang->next_penumpang = tempBooking->penumpang;
-						}
+						//Memindah posisi currPenumpang ke linked list selanjutnya dari objek penumpang
+						currPenumpang->next_penumpang = new DetailPenumpang;
+						currPenumpang = currPenumpang->next_penumpang;
 					}
 
-					headBooking = tempBooking;
+					//Setelah selesai menginput semua ada maka tempBooking akan dipindah ke headBooking yaitu linked list utama
+					if (headBooking == NULL) { //Jika headBooking kosong maka akan langsung dipindah
+						headBooking = new KodeBooking;
+						headBooking = tempBooking;
+					}
+					else { //Jika tidak maka headBooking akan dipindah ke headBooking->next_kodebooking dan headBooking akan diisi tempBooking
+						headBooking->next_kodebooking = new KodeBooking;
+						headBooking->next_kodebooking = headBooking;
+						headBooking = tempBooking;
+					}
 
+					//Pembayaran booking tiket
 					cout << "\n------------------------------------------------" << endl;
 					cout << "Kursi dipesan\t: " << headBooking->kursiDipesan << endl;
 					cout << "Harga/kursi\t: Rp " << KA.KeretaApi[headBooking->idKA].harga << endl;
@@ -727,10 +744,12 @@ void infoBooking()
 		cout << "----------------------------------------" << endl;
 		cout << "\nNo\tNIK\t\tNama\n" << endl;
 
-		DetailPenumpang* currPenumpang = currBooking->penumpang;
-		for(int i = 0; i < currBooking->kursiDipesan; i++)
+		DetailPenumpang* currPenumpang = new DetailPenumpang;
+		currPenumpang = currBooking->penumpang;
+		for (int i = 1; i <= currBooking->kursiDipesan; i++)
 		{
-			cout << i + 1 << "\t" << currPenumpang->nikPenumpang << "\t\t" << currPenumpang->namaPenumpang << endl;
+			cout << i << "\t" << currPenumpang->nikPenumpang << "\t\t" << currPenumpang->namaPenumpang << endl;
+
 			currPenumpang = currPenumpang->next_penumpang;
 		}
 		cout << "----------------------------------------" << endl;
@@ -782,8 +801,6 @@ int main()
 {
 	initKA();
 	SetConsoleTitle(TEXT("KAI ACCESS STASIUN TUGU YOGYAKARTA"));
-
-	headBooking = new KodeBooking;
 
 	//Default entry
 	pushKA("Lodaya", "Bandung", "1820", "0512", "EKS", 250000, 25);
