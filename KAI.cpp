@@ -1,15 +1,178 @@
 #include <iostream>
-#include <string.h>
-#include <conio.h>
+#include <string>
 #include <windows.h>
-#include <cstdlib>
-#include <stdio.h>
 #define max 10
 
 using namespace std;
-    
-// daftar rangkaian kereta api
-struct KA{   
+
+//Inisiasi struct
+struct KeretaApi;
+struct StackKA;
+struct KodeBooking;
+struct DetailPenumpang;
+
+//Inisiasi semua fungsi
+void pembuka(string user);
+void admin();
+void other();
+void login();
+void initKA();
+int isEmptyKA();
+int isFullKA();
+void pushKA(string nama, string tujuan, string berangkat, string tiba, string kelas, float harga, int kursi);
+void popKA();
+void cleanKA();
+void tampilKA();
+void sortKA(int pil);
+void searchKA();
+void booking();
+//string buatKodeBooking();
+void infoBooking();
+void batalBooking();
+
+void pembuka(string user)
+{
+	system("cls");
+	cout << "Login berhasil !" << endl;
+	cout << "Selamat datang di aplikasi KAI Access. Anda login sebagai " << user << "\n\n";
+	cout << "Menu yang tersedia :";
+}
+
+void login()
+{
+	char pil;
+	string username, password;
+	do
+	{
+		system("cls");
+		cout << "--------------------------------------" << endl;
+		cout << "\t\tKAI ACCESS" << endl;
+		cout << "\tSTASIUN TUGU YOGYAKARTA YK" << endl;
+		cout << "--------------------------------------" << endl;
+		cout << "Isi username dan password untuk login !" << endl;
+		cout << "Username    : "; cin >> username;
+		cout << "Password    : "; cin >> password;
+		if (username == "admin" && password == "admin")
+		{
+			admin();
+			break;
+		}
+		else if (username == "amikom" && password == "amikom")
+		{
+			other();
+			break;
+		}
+		else
+		{
+			cout << "Maaf, username/password salah ! Login ulang ? [Y/N] : "; cin >> pil;
+			if (pil == 'Y' || pil == 'y')
+				continue;
+			else
+			{
+				cout << "Terimakasih telah menggunakan layanan KAI Access" << endl;
+				break;
+			}
+		}
+	} while (pil == 'y' || pil == 'Y');
+}
+
+void admin()
+{
+	pembuka("admin");
+	int pil, kursi;
+	string namaka, tujuan, berangkat, tiba, kelas;
+	float harga;
+	do
+	{
+		cout << "\n1. Input Jadwal\n2. Hapus Jadwal Teratas\n3. Tampilkan Jadwal\n4. Reset Jadwal\n";
+		cout << "5. Sorting Jadwal\n6. Cari Jadwal\n7. Daftar Penumpang\n8. Logout\n9. Keluar\n\nMasukkan pilihan : ";
+		cin >> pil;
+
+		switch (pil)
+		{
+		case 1:
+			cout << "Lengkapi data berikut !" << endl;
+			cout << "-----------------------------------------------\n";
+			cout << "Nama KAI/ID                 : "; cin >> namaka;
+			cout << "Stasiun Tujuan              : "; cin >> tujuan;
+			cout << "Waktu Berangkat             : "; cin >> berangkat;
+			cout << "Waktu Tiba                  : "; cin >> tiba;
+			cout << "Jenis Kelas [ EKS/BUS/EKO ] : "; cin >> kelas;
+			cout << "Harga                       : Rp "; cin >> harga;
+			cout << "Ketersediaan Kursi : "; cin >> kursi;
+			pushKA(namaka, tujuan, berangkat, tiba, kelas, harga, kursi);
+			break;
+		case 2:
+			popKA();
+			break;
+		case 3:
+			tampilKA();
+			break;
+		case 4:
+			cleanKA();
+			break;
+		case 5:
+			int pilih;
+			cout << "\nUrutkan berdasarkan : ";
+			cout << "\n[1] Keberangkatan Terpagi\n[2] Harga Termurah\n\nPilihan anda : "; cin >> pilih;
+			sortKA(pilih);
+			break;
+		case 6:
+			searchKA();
+			break;
+		case 7:
+			//data_penumpang();
+			break;
+		case 8:
+			login();
+			break;
+		case 9:
+			cout << "Terimakasih telah menggunakan layanan KAI Access\n";
+			//exit(0);
+		default:
+			cout << "Maaf, angka yang anda inputkan tidak valid !" << endl;
+		}
+	} while (pil != 8);
+}
+
+void other()
+{
+	pembuka("user");
+	int pil;
+	do
+	{
+		cout << "\n1. Cari Jadwal\n2. Pemesanan\n3. Lihat Data Pemesanan\n";
+		cout << "4. Batalkan Pemesanan\n5. Logout\n6. Keluar\n\nMasukkan pilihan : ";
+		cin >> pil;
+
+		switch (pil)
+		{
+		case 1:
+			searchKA();
+			break;
+		case 2:
+			booking();
+			break;
+		case 3:
+			infoBooking();
+			break;
+		case 4:
+			batalBooking();
+			break;
+		case 5:
+			login();
+			break;
+		case 6:
+			cout << "Terimakasih telah menggunakan layanan KAI Access\n";
+			//exit(0);
+		default:
+			cout << "Maaf, angka yang anda inputkan tidak valid !" << endl;
+		}
+	} while (pil != 5);
+}
+
+//Struct berisi info kereta api.
+struct KeretaApi {
 	int id;
 	string nama;
 	string tujuan;
@@ -20,124 +183,82 @@ struct KA{
 	int kursi;
 };
 
-struct Tumpuk{
+
+//Stack berisi kereta api
+struct StackKA {
 	int top;
-	struct KA idKA[max];
-}T;
+	KeretaApi KeretaApi[max];
+}KA;
 
-// menyiapkan struct untuk pertama kali
-void awal()
+//Inisiasi stack kereta api
+void initKA()
 {
-	T.top = -1;
+	KA.top = -1;
 }
 
-// cek struct dalam kondisi kosong atau tidak
-int kosong()
+//Mengecek stack kereta api kosong
+int isEmptyKA()
 {
-	if(T.top == -1)
+	if (KA.top == -1)
 		return 1;
 	else
 		return 0;
 }
 
-// cek struct dalam kondisi penuh atau tidak
-int penuh()
+//Mengecek stack kereta api penuh
+int isFullKA()
 {
-	if(T.top == max - 1)
+	if (KA.top == max - 1)
 		return 1;
 	else
 		return 0;
 }
 
-// input data kedalam struct
-void input(string nama, string tujuan, string berangkat, string tiba, string kelas, float harga, int kursi)
+//Mengisi stack dan info kereta api
+void pushKA(string nama, string tujuan, string berangkat, string tiba, string kelas, float harga, int kursi)
 {
-	if(kosong() == 1 || penuh() == 0)
+	if (isEmptyKA() == 1 || isFullKA() == 0)
 	{
-		T.top++;
-		T.idKA[T.top].id = T.top;
-		T.idKA[T.top].nama = nama;
-		T.idKA[T.top].tujuan = tujuan;
-		T.idKA[T.top].berangkat = berangkat;
-		T.idKA[T.top].tiba = tiba;
-		T.idKA[T.top].kelas = kelas;
-		T.idKA[T.top].harga = harga;
-		T.idKA[T.top].kursi = kursi;
-		cout << "\nJadwal kereta api " << T.idKA[T.top].nama << " berhasil diinput!\n" << endl;
+		KA.top++;
+		KA.KeretaApi[KA.top].id = KA.top;
+		KA.KeretaApi[KA.top].nama = nama;
+		KA.KeretaApi[KA.top].tujuan = tujuan;
+		KA.KeretaApi[KA.top].berangkat = berangkat;
+		KA.KeretaApi[KA.top].tiba = tiba;
+		KA.KeretaApi[KA.top].kelas = kelas;
+		KA.KeretaApi[KA.top].harga = harga;
+		KA.KeretaApi[KA.top].kursi = kursi;
+		cout << "\nJadwal kereta api " << KA.KeretaApi[KA.top].nama << " berhasil diinput!\n" << endl;
 	}
 	else
 		cout << "Jadwal sudah melewati batas maksimum!";
 }
 
-// nested struct dimana booking sebagai parent dan detail_booking sebagai child
-// struct ini digunakan untuk tumpukan data pemesanan tiket
-struct detail_booking
-{
-	string kode;
-	string namaKA;
-	string tujuan;
-	string berangkat;
-	string tiba;
-	string kelas;
-	string nik[3];
-	string nama[3];
-};
-
-struct booking
-{
-	int top;
-	struct detail_booking dB[100];
-	// 100 karena 1 kereta maksimal 10 kursi. sedangkan stack bisa menampung 10 kereta. 10*10 = 100
-} B;
-
-// menghapus data teratas di dalam struct
-void hapus()
-{
-	if(kosong() == 0)
-	{
-		cout << "Jadwal kereta " << T.idKA[T.top].nama << " berhasil dihapus !" << endl;
-		T.top--;
-		
-		// stack diakses dari indeks terbesar. gak ngaruh disini, tapi yah, gitu.
-		// dibawah juga banyak yang sama.
-		for(int i = B.top; i >= 0; i--)
-		{
-			if(B.dB[i].namaKA == T.idKA[T.top].nama)
-			{
-				B.dB[i].kode = "";
-				B.dB[i].namaKA = "";
-				B.dB[i].tujuan = "";
-				B.dB[i].berangkat = "";
-				B.dB[i].tiba = "";
-				B.dB[i].kelas = "";
-				for(int j=0; j < 3; j++)
-				{
-					if(B.dB[i].nik[j] != "")
-						B.dB[i].nik[j] = "";
-					else
-						continue;
-				}
-			}
-		}
-	}
-	else
-		cout << "Tidak ada jadwal kereta api!\n\n";
+//Menghapus entry terakhir stack kereta api
+void popKA() {
+	if (isEmptyKA() != 1)
+		KA.top--;
 }
 
-// menampilkan data didalam struct
-void tampil()
+//Mereset jadwal keberangkatan
+void cleanKA() {
+	KA.top = -1;
+}
+
+//Menampilkan semua keberangkatan kereta api
+void tampilKA()
 {
-	if(kosong() == 0)
+	if (isEmptyKA() == 0)
 	{
 		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
 		cout << "\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
 		cout << "\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
 		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
 		cout << "\nKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
-		for(int i=T.top; i >= 0; i--)
+		for (int i = KA.top; i >= 0; i--)
 		{
-			cout << T.idKA[i].nama << "\t\t" << T.idKA[i].tujuan << "\t\t" << T.idKA[i].berangkat << "\t\t" << T.idKA[i].tiba << "\t\t";
-			cout << T.idKA[i].kelas << "\t\t" << T.idKA[i].harga << "\t\t" << T.idKA[i].kursi << endl;
+			cout << KA.KeretaApi[i].nama << "\t\t" << KA.KeretaApi[i].tujuan << "\t\t" << KA.KeretaApi[i].berangkat << "\t\t" << KA.KeretaApi[i].tiba << "\t\t";
+			cout << KA.KeretaApi[i].kelas << "\t\t" << KA.KeretaApi[i].harga << "\t\t" << KA.KeretaApi[i].kursi << endl;
 		}
 		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
 	}
@@ -145,127 +266,100 @@ void tampil()
 		cout << "Tidak ada jadwal kereta api!\n\n";
 }
 
-// mengosongkan struct/reset struct
-void bersih()
+//Menyortir keberangkatan kereta menurut jadwal atau harga
+void sortKA(int pil)
 {
-	// pakai aja fungsi hapus yang sudah ada.
-	for(int i = T.top; i >= 0; i--){
-		hapus();
-		T.top--;
-	}
-	cout << "Semua jadwal berhasil dibersihkan !" << endl;
-}
+	StackKA tempKA;
 
-// fungsi untuk sorting berdasarkan harga termurah dan berangkat terpagi di struct sementara/temporary sturct
-void sorting(int pil)
-{
-	struct Temp_KA
+	//Copy data dari struct utama ke temporary struct/struct sementara
+	tempKA.top = -1;
+	for (int i = 0; i <= KA.top; i++)
 	{
-		int id;
-		string nama;
-		string tujuan;
-		string berangkat;
-		string tiba;
-		string kelas;
-		float harga;
-		int kursi;
-	};
-
-	struct Temp_Tumpuk
-	{
-		int top;
-    	struct Temp_KA TidKA[max];
-	} TE;
-
-	// copy data dari struct utama ke temporary struct/struct sementara
-	TE.top = -1;
-	for(int i=0; i <= T.top; i++)
-	{
-		TE.top++;
-		TE.TidKA[i].id = T.idKA[i].id;
-		TE.TidKA[i].nama = T.idKA[i].nama;
-		TE.TidKA[i].tujuan = T.idKA[i].tujuan;
-		TE.TidKA[i].berangkat = T.idKA[i].berangkat;
-		TE.TidKA[i].tiba = T.idKA[i].tiba;
-		TE.TidKA[i].kelas = T.idKA[i].kelas;
-		TE.TidKA[i].harga = T.idKA[i].harga;
-		TE.TidKA[i].kursi = T.idKA[i].kursi;
+		tempKA.top++;
+		tempKA.KeretaApi[i].id = KA.KeretaApi[i].id;
+		tempKA.KeretaApi[i].nama = KA.KeretaApi[i].nama;
+		tempKA.KeretaApi[i].tujuan = KA.KeretaApi[i].tujuan;
+		tempKA.KeretaApi[i].berangkat = KA.KeretaApi[i].berangkat;
+		tempKA.KeretaApi[i].tiba = KA.KeretaApi[i].tiba;
+		tempKA.KeretaApi[i].kelas = KA.KeretaApi[i].kelas;
+		tempKA.KeretaApi[i].harga = KA.KeretaApi[i].harga;
+		tempKA.KeretaApi[i].kursi = KA.KeretaApi[i].kursi;
 	}
 
 	string nama[max], tujuan[max], berangkat[max], tiba[max], kelas[max];
 	float harga[max];
 	int kursi[max];
 
-	if(pil == 1)
+	if (pil == 1)
 	{
-		for(int i=1; i <= T.top; i++)
+		for (int i = 1; i <= KA.top; i++)
 		{
-			for(int j=0; j <= T.top-i; j++)
+			for (int j = 0; j <= KA.top - i; j++)
 			{
-				// sorting berdasarkan keberangkatan terpagi
-				// jadwal paling pagi diletakan paling atas( dari atas kebawah )
-				if(TE.TidKA[j].berangkat < TE.TidKA[j + 1].berangkat)
+				//Sorting berdasarkan keberangkatan terpagi
+				//Jadwal paling pagi diletakan paling atas( dari atas kebawah )
+				if (tempKA.KeretaApi[j].berangkat < tempKA.KeretaApi[j + 1].berangkat)
 				{
-					// proses pertukaran data
-					nama[j] = TE.TidKA[j].nama;
-					tujuan[j] = TE.TidKA[j].tujuan;
-					berangkat[j] = TE.TidKA[j].berangkat;
-					tiba[j] = TE.TidKA[j].tiba;
-					kelas[j] = TE.TidKA[j].kelas;
-					harga[j] = TE.TidKA[j].harga;
-					kursi[j] = TE.TidKA[j].kursi;
+					//Proses pertukaran data
+					nama[j] = tempKA.KeretaApi[j].nama;
+					tujuan[j] = tempKA.KeretaApi[j].tujuan;
+					berangkat[j] = tempKA.KeretaApi[j].berangkat;
+					tiba[j] = tempKA.KeretaApi[j].tiba;
+					kelas[j] = tempKA.KeretaApi[j].kelas;
+					harga[j] = tempKA.KeretaApi[j].harga;
+					kursi[j] = tempKA.KeretaApi[j].kursi;
 
-					TE.TidKA[j].nama = TE.TidKA[j+1].nama;
-					TE.TidKA[j].tujuan = TE.TidKA[j+1].tujuan;
-					TE.TidKA[j].berangkat = TE.TidKA[j+1].berangkat;
-					TE.TidKA[j].tiba = TE.TidKA[j+1].tiba;
-					TE.TidKA[j].kelas = TE.TidKA[j+1].kelas;
-					TE.TidKA[j].harga = TE.TidKA[j+1].harga;
-					TE.TidKA[j].kursi = TE.TidKA[j+1].kursi;
+					tempKA.KeretaApi[j].nama = tempKA.KeretaApi[j + 1].nama;
+					tempKA.KeretaApi[j].tujuan = tempKA.KeretaApi[j + 1].tujuan;
+					tempKA.KeretaApi[j].berangkat = tempKA.KeretaApi[j + 1].berangkat;
+					tempKA.KeretaApi[j].tiba = tempKA.KeretaApi[j + 1].tiba;
+					tempKA.KeretaApi[j].kelas = tempKA.KeretaApi[j + 1].kelas;
+					tempKA.KeretaApi[j].harga = tempKA.KeretaApi[j + 1].harga;
+					tempKA.KeretaApi[j].kursi = tempKA.KeretaApi[j + 1].kursi;
 
-					TE.TidKA[j+1].nama = nama[j];
-					TE.TidKA[j+1].tujuan = tujuan[j];
-					TE.TidKA[j+1].berangkat = berangkat[j];
-					TE.TidKA[j+1].tiba = tiba[j];
-					TE.TidKA[j+1].kelas = kelas[j];
-					TE.TidKA[j+1].harga = harga[j];
-					TE.TidKA[j+1].kursi = kursi[j];
+					tempKA.KeretaApi[j + 1].nama = nama[j];
+					tempKA.KeretaApi[j + 1].tujuan = tujuan[j];
+					tempKA.KeretaApi[j + 1].berangkat = berangkat[j];
+					tempKA.KeretaApi[j + 1].tiba = tiba[j];
+					tempKA.KeretaApi[j + 1].kelas = kelas[j];
+					tempKA.KeretaApi[j + 1].harga = harga[j];
+					tempKA.KeretaApi[j + 1].kursi = kursi[j];
 				}
 			}
 		}
 	}
-	else if(pil == 2)
+	else if (pil == 2)
 	{
-		for(int i=1; i <= T.top; i++)
+		for (int i = 1; i <= KA.top; i++)
 		{
-			for(int j=0; j <= T.top-i; j++)
+			for (int j = 0; j <= KA.top - i; j++)
 			{
-				// sorting berdasarkan harga termurah
-				if(TE.TidKA[j].harga < TE.TidKA[j + 1].harga)
+				//Sorting berdasarkan harga termurah
+				if (tempKA.KeretaApi[j].harga < tempKA.KeretaApi[j + 1].harga)
 				{
-					nama[j] = TE.TidKA[j].nama;
-					tujuan[j] = TE.TidKA[j].tujuan;
-					berangkat[j] = TE.TidKA[j].berangkat;
-					tiba[j] = TE.TidKA[j].tiba;
-					kelas[j] = TE.TidKA[j].kelas;
-					harga[j] = TE.TidKA[j].harga;
-					kursi[j] = TE.TidKA[j].kursi;
+					nama[j] = tempKA.KeretaApi[j].nama;
+					tujuan[j] = tempKA.KeretaApi[j].tujuan;
+					berangkat[j] = tempKA.KeretaApi[j].berangkat;
+					tiba[j] = tempKA.KeretaApi[j].tiba;
+					kelas[j] = tempKA.KeretaApi[j].kelas;
+					harga[j] = tempKA.KeretaApi[j].harga;
+					kursi[j] = tempKA.KeretaApi[j].kursi;
 
-					TE.TidKA[j].nama = TE.TidKA[j+1].nama;
-					TE.TidKA[j].tujuan = TE.TidKA[j+1].tujuan;
-					TE.TidKA[j].berangkat = TE.TidKA[j+1].berangkat;
-					TE.TidKA[j].tiba = TE.TidKA[j+1].tiba;
-					TE.TidKA[j].kelas = TE.TidKA[j+1].kelas;
-					TE.TidKA[j].harga = TE.TidKA[j+1].harga;
-					TE.TidKA[j].kursi = TE.TidKA[j+1].kursi;
+					tempKA.KeretaApi[j].nama = tempKA.KeretaApi[j + 1].nama;
+					tempKA.KeretaApi[j].tujuan = tempKA.KeretaApi[j + 1].tujuan;
+					tempKA.KeretaApi[j].berangkat = tempKA.KeretaApi[j + 1].berangkat;
+					tempKA.KeretaApi[j].tiba = tempKA.KeretaApi[j + 1].tiba;
+					tempKA.KeretaApi[j].kelas = tempKA.KeretaApi[j + 1].kelas;
+					tempKA.KeretaApi[j].harga = tempKA.KeretaApi[j + 1].harga;
+					tempKA.KeretaApi[j].kursi = tempKA.KeretaApi[j + 1].kursi;
 
-					TE.TidKA[j+1].nama = nama[j];
-					TE.TidKA[j+1].tujuan = tujuan[j];
-					TE.TidKA[j+1].berangkat = berangkat[j];
-					TE.TidKA[j+1].tiba = tiba[j];
-					TE.TidKA[j+1].kelas = kelas[j];
-					TE.TidKA[j+1].harga = harga[j];
-					TE.TidKA[j+1].kursi = kursi[j];
+					tempKA.KeretaApi[j + 1].nama = nama[j];
+					tempKA.KeretaApi[j + 1].tujuan = tujuan[j];
+					tempKA.KeretaApi[j + 1].berangkat = berangkat[j];
+					tempKA.KeretaApi[j + 1].tiba = tiba[j];
+					tempKA.KeretaApi[j + 1].kelas = kelas[j];
+					tempKA.KeretaApi[j + 1].harga = harga[j];
+					tempKA.KeretaApi[j + 1].kursi = kursi[j];
 				}
 			}
 		}
@@ -275,40 +369,39 @@ void sorting(int pil)
 		cout << "Angka yang anda input tidak valid !" << endl;
 	}
 
-	// menampilkan hasil sorting
+	//Menampilkan hasil sorting
 	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
 	cout << "\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
 	cout << "\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
 	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
 	cout << "\nKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
-	for(int i=T.top; i >= 0 ; i--)
+	for (int i = KA.top; i >= 0; i--)
 	{
-			cout << TE.TidKA[i].nama << "\t\t" << TE.TidKA[i].tujuan << "\t\t" << TE.TidKA[i].berangkat << "\t\t" << TE.TidKA[i].tiba << "\t\t";
-			cout << TE.TidKA[i].kelas << "\t\t" << TE.TidKA[i].harga << "\t\t" << TE.TidKA[i].kursi << endl;
+		cout << tempKA.KeretaApi[i].nama << "\t\t" << tempKA.KeretaApi[i].tujuan << "\t\t" << tempKA.KeretaApi[i].berangkat << "\t\t" << tempKA.KeretaApi[i].tiba << "\t\t";
+		cout << tempKA.KeretaApi[i].kelas << "\t\t" << tempKA.KeretaApi[i].harga << "\t\t" << tempKA.KeretaApi[i].kursi << endl;
 	}
 	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
-	
 }
 
-// fungsi pencarian data berdasarkan stasiun tujuan
-void searching()
+//Mencari keberangkatan kereta sesuai stasiun tujuan
+void searchKA()
 {
 	string tujuan;
-	int j=0;
+	int j = 0;
 	int index[max];
 
 	cout << "\nMasukkan stasiun tujuan : ";
 	cin >> tujuan;
-	
-	for(int i=0; i <= T.top; i++)
+
+	for (int i = 0; i <= KA.top; i++)
 	{
-		if(T.idKA[i].tujuan == tujuan)
+		if (KA.KeretaApi[i].tujuan == tujuan)
 		{
 			index[j] = i;
 			j++;
 		}
 	}
-	if(j > 0)
+	if (j > 0)
 	{
 		cout << "Terdapat " << j << " jadwal keberangkatan ke " << tujuan << "\n\n";
 		cout << "------------------------------------------------------------------------------------------------------------------" << endl;
@@ -316,10 +409,10 @@ void searching()
 		cout << "\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
 		cout << "------------------------------------------------------------------------------------------------------------------" << endl;
 		cout << "\nKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
-		for(int i=0; i < j ; i++)
+		for (int i = 0; i < j; i++)
 		{
-			cout << T.idKA[index[i]].nama << "\t\t" << T.idKA[index[i]].tujuan << "\t\t" << T.idKA[index[i]].berangkat << "\t\t" << T.idKA[index[i]].tiba << "\t\t";
-			cout << T.idKA[index[i]].kelas << "\t\t" << T.idKA[index[i]].harga << "\t\t" << T.idKA[index[i]].kursi << endl;
+			cout << KA.KeretaApi[index[i]].nama << "\t\t" << KA.KeretaApi[index[i]].tujuan << "\t\t" << KA.KeretaApi[index[i]].berangkat << "\t\t" << KA.KeretaApi[index[i]].tiba << "\t\t";
+			cout << KA.KeretaApi[index[i]].kelas << "\t\t" << KA.KeretaApi[index[i]].harga << "\t\t" << KA.KeretaApi[index[i]].kursi << endl;
 		}
 		cout << "------------------------------------------------------------------------------------------------------------------" << endl;
 	}
@@ -329,292 +422,38 @@ void searching()
 	}
 }
 
-// tulisan pembuka setelah pengguna login di aplikasi
-// ada 2 user yaitu admin dan user biasa
-void pembuka(string user)
+//Mencari data penumpang dari satu keberangkatan
+/*BROKEN
+void dataPenumpangKA()
 {
-	system("cls");
-	cout << "Login berhasil !" << endl;
-	cout << "Selamat datang di aplikasi KAI Access. Anda login sebagai " << user << "\n\n";
-	cout << "Menu yang tersedia :";
-}
-
-// fungsi non void untuk mengacak huruf dan angka sebagai kode booking
-string kode_booking()
-{
-	string kode;
-	char letter;
-	int posisi = B.top;
-	for(int angka = posisi; angka < posisi + 1; angka++)
-	{
-		for(int i=0; i < 1; i++)
-		{
-			if(angka % 2 != 0 && angka <= 50)
-			{
-				if(angka <= 25)
-				{
-					letter = 'R';
-				}
-				else
-				{
-					letter = 'T';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 1) + static_cast<char>(letter + 2) + static_cast<char>(letter + 4) + to_string(angka + 13);
-			}
-			else if(angka % 2 == 0 && angka <= 50)
-			{
-				if(angka <= 25)
-				{
-					letter = 'S';
-				}
-				else
-				{
-					letter = 'P';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 3) + static_cast<char>(letter + 4) + static_cast<char>(letter + 7) + to_string(angka + 59);
-			}	
-			else if(angka % 2 != 0 && angka > 50)
-			{
-				if(angka <= 75)
-				{
-					letter = 'M';
-				}
-				else
-				{
-					letter = 'K';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 1) + static_cast<char>(letter + 1) + static_cast<char>(letter + 3) + to_string(angka - 3);
-			}
-			else if(angka % 2 == 0 && angka > 50)
-			{
-				if(angka <= 25)
-				{
-					letter = 'J';
-				}
-				else
-				{
-					letter = 'G';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 3) + static_cast<char>(letter + 3) + static_cast<char>(letter + 6) + to_string(angka - 11);
-			}
-		}
-	}	
-	return kode;
-} 
-
-// fungsi pemesanan/booking
-void booking()
-{
-	int pil, jumlah;
-	system("cls");
-
-	string tujuan, kode;
-	int j=0;
-	int index[max];
-	cout << "Masukkan stasiun tujuan : ";
-	cin >> tujuan;
-	
-	for(int i=0; i <= T.top; i++)
-	{
-		if(T.idKA[i].tujuan == tujuan)
-		{
-			index[j] = i;
-			j++;
-		}
-	}
-	if(j > 0)
-	{
-		cout << "\nTerdapat " << j << " jadwal keberangkatan ke " << tujuan << "\n\n";
-		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-		cout << "\t\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
-		cout << "\t\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
-		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-		cout << "\nNo\tKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
-		for(int i=0; i < j ; i++)
-		{
-			cout << i+1 << "\t" << T.idKA[index[i]].nama << "\t\t" << T.idKA[index[i]].tujuan << "\t\t" << T.idKA[index[i]].berangkat << "\t\t" << T.idKA[index[i]].tiba << "\t\t";
-			cout << T.idKA[index[i]].kelas << "\t\t" << T.idKA[index[i]].harga << "\t\t" << T.idKA[index[i]].kursi << endl;
-		}
-		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
-		
-		do
-		{
-			cout << "\nNomor yang anda pilih : "; cin >> pil;
-			if(pil < 1 || pil > j)
-				cout << "Maaf, pilihan tidak valid !" << endl;
-		} while(pil < 1 || pil > j);
-		if(pil <= j && pil > 0)
-		{
-			cout << "\nAnda memilih kereta api " << T.idKA[index[pil - 1]].nama << " dengan tujuan " << T.idKA[index[pil - 1]].tujuan << endl; 
-			do
-			{
-				cout << "Jumlah kursi yang anda pesan [Max 3] : "; cin >> jumlah;
-				if(jumlah > 0 && jumlah < 4 && jumlah <= T.idKA[index[pil - 1]].kursi)
-				{
-					B.top++;
-					cout << "\n";
-					cout << "------------------------------------------------" << endl;
-					cout << "\tFormulir Pemesanan Tiket KAI" << endl;
-					cout << "------------------------------------------------" << endl;
-					kode = kode_booking();
-					cout << "\nKODE BOOKING " << kode;
-					cout << endl;
-					cout << "\nIdentitas Kereta Api" << endl;
-					cout << "Nama Kereta      : " << T.idKA[index[pil - 1]].nama << endl;
-					cout << "Stasiun Tujuan   : " << T.idKA[index[pil - 1]].tujuan << endl;
-					cout << "Waktu Berangkat  : " << T.idKA[index[pil - 1]].berangkat << endl;
-					cout << "Waktu Tiba       : " << T.idKA[index[pil - 1]].tiba << endl;
-					cout << "Kelas            : " << T.idKA[index[pil - 1]].kelas << endl;
-					cout << "------------------------------------------------" << endl;
-
-					// proses input data dari struct utama ke struct khusus pemesanan
-					B.dB[B.top].kode = kode;
-					B.dB[B.top].namaKA = T.idKA[index[pil - 1]].nama;
-					B.dB[B.top].tujuan = T.idKA[index[pil - 1]].tujuan;
-					B.dB[B.top].berangkat = T.idKA[index[pil - 1]].berangkat;
-					B.dB[B.top].tiba = T.idKA[index[pil - 1]].tiba;
-					B.dB[B.top].kelas = T.idKA[index[pil - 1]].kelas;
-
-					int total, bayar;
-					for(int i=0; i < jumlah; i++)
-					{
-						cout << "\nData Penumpang ke - " << i+1 << endl;
-						cout << "Masukkan NIK  : "; cin >> B.dB[B.top].nik[i];
-						cout << "Masukkan Nama : "; cin >> B.dB[B.top].nama[i];
-					}
-					cout << "\n------------------------------------------------" << endl;
-					cout << "Kursi dipesan : " << jumlah << endl;
-					cout << "Harga/kursi   : Rp " << T.idKA[index[pil - 1]].harga << endl;
-					total = jumlah * T.idKA[index[pil - 1]].harga;
-					cout << "Total bayar   : Rp " << total << endl;
-					do
-					{
-						cout << "Dibayar       : Rp "; cin >> bayar;
-						if(bayar < total)
-							cout << "Maaf, uang yang dibayarkan tidak cukup !" << endl;
-						else
-						{	
-							cout << "Kembali       : Rp " << bayar - total << endl;
-							cout << "\n------------------------------------------------" << endl;
-							cout << "STATUS : Pemesanan tiket berhasil !" << endl;
-							T.idKA[index[pil - 1]].kursi = T.idKA[index[pil - 1]].kursi - jumlah; 
-						}
-					} while(bayar < total);
-				} 
-				else if(jumlah > T.idKA[index[pil - 1]].kursi)
-					cout << "Maaf, kursi yang tersisa sebanyak " << T.idKA[index[pil - 1]].kursi << " kursi" << endl;
-				else if(jumlah > 3)
-					cout << "Maaf, jumlah pemesanan tidak boleh lebih dari 3 kursi" << endl;
-				else
-					cout << "Maaf, nomor yang anda inputkan tidak valid !" << endl;
-			} while(jumlah > 3 || jumlah <= 0);
-		}
-		else
-			cout << "Maaf, tidak tersedia nomor " << pil << " pada jadwal !" << endl;
-	}
-	else
-	{
-		cout << "\nTidak ada jadwal keberangkatan kereta api ke " << tujuan << " !" << endl;
-	}
-}
-
-// fungsi untuk menampilkan data pemesan dari kode booking tertentu
-void detail_booking()
-{
-	string kode;
-	int j=0;
-	int index[max];
-	cout << "Masukkan kode booking : "; cin >> kode;
-
-	for(int i=0; i <= B.top; i++)
-	{
-		if(B.dB[i].kode == kode)
-		{
-			index[j] = i;
-			j++;
-		}
-	}
-	if(j > 0)
-	{
-		string nama;
-		int l=0;
-		for(int i=0; i < j; i++)
-		{
-			nama = B.dB[index[i]].namaKA;
-		}
-		for(int k=0; k <= T.top; k++)
-		{
-			if(T.idKA[k].nama == nama)
-			{
-				l++;
-			}
-		}
-		if(l > 0)
-		{
-			cout << "----------------------------------------" << endl;
-			cout << "\t\tData Tiket" << endl;
-			cout << "----------------------------------------" << endl;
-			cout << "\nKode Booking    : " << kode << endl;
-			for(int i=0; i < j ; i++)
-			{
-				cout << "Nama Kereta     : " << B.dB[index[i]].namaKA << endl;
-				cout << "Stasiun Tujuan  : " << B.dB[index[i]].tujuan << endl;
-				cout << "Waktu Berangkat : " << B.dB[index[i]].berangkat << endl;
-				cout << "Waktu Tiba      : " << B.dB[index[i]].tiba << endl;
-				cout << "Kelas           : " << B.dB[index[i]].kelas << endl;
-				cout << "----------------------------------------" << endl;
-				cout << "\nNo\tNIK\t\tNama\n" << endl;
-				for(int j=0; j < 3; j++)
-				{
-					if(B.dB[index[i]].nik[j] != "")
-						cout << j+1 << "\t" << B.dB[index[i]].nik[j] << "\t\t" << B.dB[index[i]].nama[j] << endl;
-					else
-						break;
-				}
-				cout << "----------------------------------------" << endl;
-			}
-		}
-		else
-		{
-			cout << "Maaf, jadwal kereta " << nama << " sudah dihapus/telah selesai !" << endl;
-		}
-	}
-	else
-	{
-		cout << "\nKode booking " << kode << " tidak ditemukan !" << endl;
-	}
-}
-
-void data_penumpang()
-{
-	if(kosong() == 0)
+	if (isEmptyKA() == 0)
 	{
 		cout << "----------------------------------------------------------------------------------------------------------------------" << endl;
 		cout << "\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
 		cout << "\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
 		cout << "----------------------------------------------------------------------------------------------------------------------" << endl;
 		cout << "\nNo.\tKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
-		for(int i=0; i <= T.top; i++)
+		for (int i = 0; i <= T.top; i++)
 		{
-			cout << i+1 << "\t" << T.idKA[i].nama << "\t\t" << T.idKA[i].tujuan << "\t\t" << T.idKA[i].berangkat << "\t\t" << T.idKA[i].tiba << "\t\t";
+			cout << i + 1 << "\t" << T.idKA[i].nama << "\t\t" << T.idKA[i].tujuan << "\t\t" << T.idKA[i].berangkat << "\t\t" << T.idKA[i].tiba << "\t\t";
 			cout << T.idKA[i].kelas << "\t\t" << T.idKA[i].harga << "\t\t" << T.idKA[i].kursi << endl;
 		}
 		cout << "----------------------------------------------------------------------------------------------------------------------" << endl;
 		int pil;
 		cout << "\nPilihan anda : "; cin >> pil;
-		if(pil > 0 && pil <= T.top + 1)
+		if (pil > 0 && pil <= T.top + 1)
 		{
-			int j=0;
+			int j = 0;
 			int index[max];
-			for(int i=0; i <= B.top; i++)
+			for (int i = 0; i <= B.top; i++)
 			{
-				if(B.dB[i].namaKA == T.idKA[pil - 1].nama)
+				if (B.dB[i].namaKA == T.idKA[pil - 1].nama)
 				{
 					index[j] = i;
 					j++;
 				}
 			}
-			if(j > 0)
+			if (j > 0)
 			{
 				cout << "-------------------------------------" << endl;
 				cout << "\tData Penumpang" << endl;
@@ -625,11 +464,11 @@ void data_penumpang()
 				cout << "Tiba          : " << T.idKA[pil - 1].tiba << endl;
 				cout << "-------------------------------------" << endl;
 				cout << "\nNIK\t\tNama\n" << endl;
-				for(int i=0; i < j; i++)
+				for (int i = 0; i < j; i++)
 				{
-					for(int k=0; k < 3; k++)
+					for (int k = 0; k < 3; k++)
 					{
-						if(B.dB[index[i]].nik[k] != "")
+						if (B.dB[index[i]].nik[k] != "")
 							cout << B.dB[index[i]].nik[k] << "\t\t" << B.dB[index[i]].nama[k] << endl;
 						else
 							continue;
@@ -645,246 +484,329 @@ void data_penumpang()
 	}
 	else
 		cout << "Maaf, tidak ada jadwal keberangkatan kereta api !" << endl;
-}
+}*/
 
-void batalkan_pemesanan()
+//Linked list berisi info booking penumpang
+//Header diawali dengan Kode Booking dan detail Kereta Api
+
+struct KodeBooking {
+	string kodeBooking;
+	int idKA;
+	int kursiDipesan;
+	DetailPenumpang* penumpang;
+	KodeBooking* next_kodebooking;
+}*headBooking;
+
+//Lalu diikuti dengan info penumpang
+struct DetailPenumpang {
+	string namaPenumpang;
+	string nikPenumpang;
+	DetailPenumpang* next_penumpang;
+};
+
+//Memesanan tiket
+void booking()
 {
-	if(B.top != -1)
-	{
-		string kode;
-		char pil;
-		int k = 0;
-		cout << "\nMasukkan kode booking : "; cin >> kode;
-		for(int i=0; i <= B.top; i++)
-		{
-			if(B.dB[i].kode == kode)
-			{
-				k++;
-				cout << "Kode booking " << kode << ", Pemesanan tiket kereta api " << B.dB[i].namaKA << " dengan tujuan " << B.dB[i].tujuan << "." << endl;
-				cout << "Apakah anda yakin ingin membatalkan pesanan [Y/N] : "; cin >> pil;
-				if(pil == 'y' || pil == 'Y')
-				{
-					/*for(int i=0; i <= T.top; i++)
-					{
-						if(T.idKA[i].nama == B.dB[i].namaKA && T.idKA[i].kelas == B.dB[i].kelas)
-						{
-							int jumlah = 0;
-							for(int j=0; j < 3; j++)
-							{
-								if(B.dB[i].nik[j] != "")
-								{
-									jumlah++;
-								}
-							}
-							T.idKA[i].kursi = T.idKA[i].kursi + jumlah;
-						}
-					}*/
+	system("cls");
 
-					for(int i=0; i <= T.top; i++)
+	//User menginput tujuan
+	cout << "Masukkan stasiun tujuan : ";
+	string inputTujuan;
+	cin >> inputTujuan;
+
+	//Mengecek keberangkatan dengan tujuan yang sesuai dengan input user
+	int totalKeberangkatan = 0; //Counter posisi pada stack KA
+	int keberangkatan[max]; //Penyimpan posisi pada stack yang sesuai dengan input
+	for (int i = 0; i <= KA.top; i++)
+	{
+		if (KA.KeretaApi[i].tujuan == inputTujuan)
+		{
+			keberangkatan[totalKeberangkatan] = i; //Menyimpan posisi stack KA pada array
+			totalKeberangkatan++; //Total keberangkatan dengan tujuan yang sama bertambah
+		}
+	}
+
+	if (totalKeberangkatan > 0)
+	{
+		//Output semua keberangkatan yang berhasil ditemukan yang sesuai input
+		cout << "\nTerdapat " << totalKeberangkatan << " jadwal keberangkatan ke " << inputTujuan << "\n\n";
+		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
+		cout << "\t\t\t\t\t\tJADWAL KEBERANGKATAN KERETA API" << endl;
+		cout << "\t\t\t\t\t\tSTASIUN BESAR YOGYAKARTA (TUGU)" << endl;
+		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
+		cout << "\nNo\tKereta Api/ID\t\tTujuan\t\tBerangkat\tTiba\t\tKelas\t\tHarga (Rp)\tKursi\n" << endl;
+		for (int i = 0; i < totalKeberangkatan; i++)
+		{
+			cout << i + 1 << "\t";
+			cout << KA.KeretaApi[keberangkatan[i]].nama << "\t\t";
+			cout << KA.KeretaApi[keberangkatan[i]].tujuan << "\t\t";
+			cout << KA.KeretaApi[keberangkatan[i]].berangkat << "\t\t";
+			cout << KA.KeretaApi[keberangkatan[i]].tiba << "\t\t";
+			cout << KA.KeretaApi[keberangkatan[i]].kelas << "\t\t";
+			cout << KA.KeretaApi[keberangkatan[i]].harga << "\t\t";
+			cout << KA.KeretaApi[keberangkatan[i]].kursi << endl;
+		}
+		cout << "-----------------------------------------------------------------------------------------------------------------------" << endl;
+
+		//Input user memilih salah satu keberangkatan
+		int pil;
+		do
+		{
+			cout << "\nNomor yang anda pilih : ";
+			cin >> pil;
+
+			if (keberangkatan[pil] == NULL) {
+				cout << "Maaf, pilihan tidak valid !" << endl;
+				pil = NULL;
+			}
+		} while (pil == NULL);
+
+		//Memesan tiket booking sesuai pilihan
+		if (pil != NULL)
+		{
+			cout << "\nAnda memilih kereta api " << KA.KeretaApi[keberangkatan[pil - 1]].nama << " dengan tujuan " << KA.KeretaApi[keberangkatan[pil - 1]].tujuan << endl;
+			int jumlahKursi = 0;
+			do
+			{
+				cout << "Jumlah kursi yang anda pesan : ";
+				cin >> jumlahKursi; //Input jumlah kursi yang ingin dipesan
+
+				if (jumlahKursi > 0 && jumlahKursi < KA.KeretaApi[keberangkatan[pil - 1]].kursi)
+				{
+					//Buat objek struct sebagai penyimpanan sementara yang nanti akan dipindah ke headBooking
+					KodeBooking *tempBooking = new KodeBooking; 
+
+					tempBooking->kodeBooking = "XL2411P"; //Generate kode booking
+					tempBooking->idKA = KA.KeretaApi[keberangkatan[pil - 1]].id; //Menyimpan idKA
+					tempBooking->kursiDipesan = jumlahKursi; //Menyimpan jumlah kursi
+
+					//Output detail pemesanan tiket
+					cout << "\n";
+					cout << "------------------------------------------------" << endl;
+					cout << "\tFormulir Pemesanan Tiket KAI" << endl;
+					cout << "------------------------------------------------" << endl;
+					cout << "\nKODE BOOKING " << tempBooking->kodeBooking;
+					cout << endl;
+					cout << "\nIdentitas Kereta Api" << endl;
+					cout << "Nama Kereta\t: " << KA.KeretaApi[tempBooking->idKA].nama << endl;
+					cout << "Stasiun Tujuan\t: " << KA.KeretaApi[tempBooking->idKA].tujuan << endl;
+					cout << "Waktu Berangkat\t: " << KA.KeretaApi[tempBooking->idKA].berangkat << endl;
+					cout << "Waktu Tiba\t: " << KA.KeretaApi[tempBooking->idKA].tiba << endl;
+					cout << "Kelas\t\t: " << KA.KeretaApi[tempBooking->idKA].kelas << endl;
+					cout << "------------------------------------------------" << endl;
+					
+					//Buat objek struct yang akan menyimpan posisi pembacaan dari struct penumpang yang ada pada tempBooking
+					DetailPenumpang *currPenumpang = new DetailPenumpang;
+					//Inisiasi objek struct penumpang yang ada pada tempBooking
+					tempBooking->penumpang = new DetailPenumpang;
+					//Posisi awal currPenumpang = tempBooking->penumpang = head dari objek struct penumpang
+					currPenumpang = tempBooking->penumpang;
+					for (int i = 0; i < jumlahKursi; i++)
 					{
-						for(int k=0; k <= B.top; k++)
-						{
-							if(T.idKA[i].nama == B.dB[k].namaKA && T.idKA[i].kelas == B.dB[k].kelas && B.dB[k].kode == kode)
-							{
-								int jumlah = 0;
-								for(int j=0; j < 3; j++)
-								{
-									if(B.dB[k].nik[j] != "")
-									{
-										jumlah++;
-									}
-								}
-								T.idKA[i].kursi = T.idKA[i].kursi + jumlah;
-							}
-						}
+						//Melakukan imput data ke dalam struct yang posisinya sekarang sudah disimpan di currPenumpang
+						cout << "\nData Penumpang ke - " << i << endl;
+						cout << "Masukkan NIK\t: "; cin >> currPenumpang->nikPenumpang;
+						cout << "Masukkan Nama\t: "; cin >> currPenumpang->namaPenumpang;
+
+						//Memindah posisi currPenumpang ke linked list selanjutnya dari objek penumpang
+						currPenumpang->next_penumpang = new DetailPenumpang;
+						currPenumpang = currPenumpang->next_penumpang;
 					}
 
-					B.dB[i].kode = "";
-					B.dB[i].namaKA = "";
-					B.dB[i].tujuan = "";
-					B.dB[i].berangkat = "";
-					B.dB[i].tiba = "";
-					B.dB[i].kelas = "";
-					for(int j=0; j < 3; j++)
+					//Setelah selesai menginput semua ada maka tempBooking akan dipindah ke headBooking yaitu linked list utama
+					if (headBooking == NULL) { //Jika headBooking kosong maka akan langsung dipindah
+						headBooking = new KodeBooking;
+						headBooking = tempBooking;
+					}
+					else { //Jika tidak maka headBooking akan dipindah ke headBooking->next_kodebooking dan headBooking akan diisi tempBooking
+						headBooking->next_kodebooking = new KodeBooking;
+						headBooking->next_kodebooking = headBooking;
+						headBooking = tempBooking;
+					}
+
+					//Pembayaran booking tiket
+					cout << "\n------------------------------------------------" << endl;
+					cout << "Kursi dipesan\t: " << headBooking->kursiDipesan << endl;
+					cout << "Harga/kursi\t: Rp " << KA.KeretaApi[headBooking->idKA].harga << endl;
+					int total = jumlahKursi * KA.KeretaApi[headBooking->idKA].harga, bayar;
+					cout << "Total bayar\t: Rp " << total << endl;
+					do
 					{
-						if(B.dB[i].nik[j] != "")
-						{
-							B.dB[i].nik[j] = "";
-						}
+						cout << "Dibayar\t: Rp "; cin >> bayar;
+						if (bayar < total)
+							cout << "Maaf, uang yang dibayarkan tidak cukup !" << endl;
 						else
 						{
-							continue;
+							cout << "Kembali\t: Rp " << bayar - total << endl;
+							cout << "\n------------------------------------------------" << endl;
+							cout << "STATUS : Pemesanan tiket berhasil!" << endl;
+							KA.KeretaApi[headBooking->idKA].kursi = KA.KeretaApi[headBooking->idKA].kursi - jumlahKursi;
 						}
-					}
-					cout << "Pemesanan tiket berhasil dibatalkan !" << endl;
+					} while (bayar < total);
+				}
+			} while (jumlahKursi == 0);
+		}
+		else
+			cout << "Maaf, tidak tersedia nomor " << pil << " pada jadwal !" << endl;
+	}
+	else
+		cout << "\nTidak ada jadwal keberangkatan kereta api ke " << inputTujuan << " !" << endl;
+}
+
+//Membuat kode booking
+/*string buatKodeBooking()
+{
+	string kode;
+	char letter;
+
+	int posisi = B.top 0;
+	for (int angka = posisi; angka < posisi + 1; angka++)
+	{
+		for (int i = 0; i < 1; i++)
+		{
+			if (angka % 2 != 0 && angka <= 50)
+			{
+				if (angka <= 25)
+				{
+					letter = 'R';
 				}
 				else
 				{
-					cout << "Pembatalan tiket gagal !" << endl;
-					break;
+					letter = 'T';
 				}
+				kode = static_cast<char>(letter) + to_string(angka + 1) + static_cast<char>(letter + 2) + static_cast<char>(letter + 4) + to_string(angka + 13);
+			}
+			else if (angka % 2 == 0 && angka <= 50)
+			{
+				if (angka <= 25)
+				{
+					letter = 'S';
+				}
+				else
+				{
+					letter = 'P';
+				}
+				kode = static_cast<char>(letter) + to_string(angka + 3) + static_cast<char>(letter + 4) + static_cast<char>(letter + 7) + to_string(angka + 59);
+			}
+			else if (angka % 2 != 0 && angka > 50)
+			{
+				if (angka <= 75)
+				{
+					letter = 'M';
+				}
+				else
+				{
+					letter = 'K';
+				}
+				kode = static_cast<char>(letter) + to_string(angka + 1) + static_cast<char>(letter + 1) + static_cast<char>(letter + 3) + to_string(angka - 3);
+			}
+			else if (angka % 2 == 0 && angka > 50)
+			{
+				if (angka <= 25)
+				{
+					letter = 'J';
+				}
+				else
+				{
+					letter = 'G';
+				}
+				kode = static_cast<char>(letter) + to_string(angka + 3) + static_cast<char>(letter + 3) + static_cast<char>(letter + 6) + to_string(angka - 11);
 			}
 		}
-		if(k == 0)
+	}
+
+	return kode;
+}*/
+
+//Mencari info kereta dan penumpang dari kode booking
+void infoBooking()
+{
+	cout << "Masukkan kode booking : ";
+	string inputKodeBooking;
+	cin >> inputKodeBooking;
+
+	KodeBooking* currBooking = headBooking;
+
+	while (currBooking->kodeBooking != inputKodeBooking) {
+		currBooking = currBooking->next_kodebooking;
+	}
+	
+	if (currBooking->kodeBooking == inputKodeBooking) {
+		cout << "----------------------------------------" << endl;
+		cout << "\t\tData Tiket" << endl;
+		cout << "----------------------------------------" << endl;
+		cout << "\nKode Booking\t: " << currBooking->kodeBooking << endl;
+		cout << "Nama Kereta\t: " << KA.KeretaApi[currBooking->idKA].nama << endl;
+		cout << "Stasiun Tujuan\t: " << KA.KeretaApi[currBooking->idKA].tujuan << endl;
+		cout << "Waktu Berangkat\t: " << KA.KeretaApi[currBooking->idKA].berangkat << endl;
+		cout << "Waktu Tiba\t: " << KA.KeretaApi[currBooking->idKA].tiba << endl;
+		cout << "Kelas\t\t: " << KA.KeretaApi[currBooking->idKA].kelas << endl;
+		cout << "----------------------------------------" << endl;
+		cout << "\nNo\tNIK\t\tNama\n" << endl;
+
+		DetailPenumpang* currPenumpang = new DetailPenumpang;
+		currPenumpang = currBooking->penumpang;
+		for (int i = 1; i <= currBooking->kursiDipesan; i++)
 		{
-			cout << "Maaf, kode booking " << kode << " tidak ditemukan !" << endl; 
+			cout << i << "\t" << currPenumpang->nikPenumpang << "\t\t" << currPenumpang->namaPenumpang << endl;
+
+			currPenumpang = currPenumpang->next_penumpang;
 		}
+		cout << "----------------------------------------" << endl;
 	}
 	else
 	{
-		cout << "Maaf, tidak ada riwayat pemesanan di KAI access" << endl;
+		cout << "\nKode booking " << inputKodeBooking << " tidak ditemukan !" << endl;
 	}
 }
 
-// fungsi untuk user admin dan user biasa
-void login();
-void admin()
-{	
-	pembuka("admin");
-	int pil, kursi;
-	string namaka, tujuan, berangkat, tiba, kelas;
-	float harga;
-	do
+//Membatalkan pemesanan tiket dengan input kode booking
+void batalBooking()
+{
+	if (headBooking != NULL)
 	{
-		cout << "\n1. Input Jadwal\n2. Hapus Jadwal Teratas\n3. Tampilkan Jadwal\n4. Reset Jadwal\n";
-		cout << "5. Sorting Jadwal\n6. Cari Jadwal\n7. Daftar Penumpang\n8. Logout\n9. Keluar\n\nMasukkan pilihan : ";
-		cin >> pil;
+		cout << "\nMasukkan kode booking : "; 
+		string inputKodeBooking;
+		cin >> inputKodeBooking;
 
-		switch(pil)
-		{
-			case 1 :
-				cout << "Lengkapi data berikut !" << endl;
-				cout << "-----------------------------------------------\n";
-				cout << "Nama KAI/ID                 : "; cin >> namaka;
-				cout << "Stasiun Tujuan              : "; cin >> tujuan;
-				cout << "Waktu Berangkat             : "; cin >> berangkat;
-				cout << "Waktu Tiba                  : "; cin >> tiba;
-				cout << "Jenis Kelas [ EKS/BUS/EKO ] : "; cin >> kelas;
-				cout << "Harga                       : Rp "; cin >> harga;
-				do
+		KodeBooking *currBooking, *prevBooking = headBooking;
+		for (currBooking = headBooking; currBooking != NULL; currBooking = currBooking->next_kodebooking) {
+			if (currBooking->kodeBooking == inputKodeBooking) {
+				cout << "Kode booking " << inputKodeBooking << ", Pemesanan tiket kereta api " << KA.KeretaApi[currBooking->idKA].nama << " dengan tujuan " << KA.KeretaApi[currBooking->idKA].tujuan << "." << endl;
+				cout << "Apakah anda yakin ingin membatalkan pesanan [Y/N] : "; 
+				int pil;
+				cin >> pil;
+
+				if (pil == 'y' || pil == 'Y')
 				{
-					cout << "Ketersediaan Kursi [Max 10] : "; cin >> kursi;
-					if(kursi > 10)
-						cout << "Maaf, jumlah kursi tidak boleh lebih dari 10 kursi" << endl;
-					else if(kursi < 1)
-						cout << "Maaf, minimal 1 kursi" << endl;
-					else
-						input(namaka, tujuan, berangkat, tiba, kelas, harga, kursi);
-				} while(kursi > 10 || kursi < 1);
-				break;
-			case 2 :
-				hapus();
-				break;
-			case 3 :
-				tampil();
-				break;
-			case 4 :
-				bersih();
-				break;
-			case 5 :
-				int pilih;
-				cout << "\nUrutkan berdasarkan : ";
-				cout << "\n[1] Keberangkatan Terpagi\n[2] Harga Termurah\n\nPilihan anda : "; cin >> pilih;
-				sorting(pilih);
-				break;
-			case 6 :
-				searching();
-				break;
-			case 7 :
-				data_penumpang();
-				break;
-			case 8 :
-				login();
-				break;
-			case 9 :
-				cout << "Terimakasih telah menggunakan layanan KAI Access\n";
-				exit(0);
-			default :
-				cout << "Maaf, angka yang anda inputkan tidak valid !" << endl;
-		}
-	} while(pil != 8);
-}
-
-void other()
-{
-	pembuka("user");
-	int pil;
-	do
-	{
-		cout << "\n1. Cari Jadwal\n2. Pemesanan\n3. Lihat Data Pemesanan\n";
-		cout << "4. Batalkan Pemesanan\n5. Logout\n6. Keluar\n\nMasukkan pilihan : ";
-		cin >> pil;
-
-		switch(pil)
-		{
-			case 1 :
-				searching();
-				break;
-			case 2 :
-				booking();
-				break;
-			case 3 :
-				detail_booking();
-				break;
-			case 4 :
-				batalkan_pemesanan();
-				break;
-			case 5 :
-				login();
-				break;
-			case 6 :
-				cout << "Terimakasih telah menggunakan layanan KAI Access\n";
-				exit(0);
-			default :
-				cout << "Maaf, angka yang anda inputkan tidak valid !" << endl;
-		}
-	} while(pil != 5);
-}
-
-// fungsi login 
-void login()
-{
-	char pil;
-	string username, password;
-	do
-	{
-		system("cls");
-		cout << "--------------------------------------" << endl;
-		cout << "\t\tKAI ACCESS" << endl;
-		cout << "\tSTASIUN TUGU YOGYAKARTA YK" << endl;
-		cout << "--------------------------------------" << endl;
-		cout << "Isi username dan password untuk login !" << endl;
-		cout << "Username    : "; cin >> username;
-		cout << "Password    : "; cin >> password;
-		if(username == "admin" && password == "admin")
-		{
-			admin();
-			break;
-		}
-		else if(username == "amikom" && password == "amikom")
-		{
-			other();
-			break;
-		}
-		else
-		{
-			cout << "Maaf, username/password salah ! Login ulang ? [Y/N] : "; cin >> pil;
-			if(pil == 'Y' || pil == 'y')
-				continue;
-			else
-			{
-				cout << "Terimakasih telah menggunakan layanan KAI Access" << endl;
-				break;
+					DetailPenumpang* currPenumpang = currBooking->penumpang, * nextPenumpang;
+					for (nextPenumpang = currPenumpang->next_penumpang; currPenumpang != NULL; nextPenumpang = currPenumpang->next_penumpang) {
+						delete currPenumpang;
+						currPenumpang = nextPenumpang;
+					}
+					
+					prevBooking->next_kodebooking = currBooking->next_kodebooking;
+					delete currBooking;
+				}
 			}
-		}	
-	} while(pil == 'y' || pil == 'Y');
+			else
+				prevBooking = currBooking;
+		}
+	}
+	else
+		cout << "Kode booking tidak ditemukan!" << endl;
 }
 
 int main()
 {
-	awal();
-	B.top = -1;
+	initKA();
 	SetConsoleTitle(TEXT("KAI ACCESS STASIUN TUGU YOGYAKARTA"));
+
+	//Default entry
+	pushKA("Lodaya", "Bandung", "1820", "0512", "EKS", 250000, 25);
+	pushKA("Joglosemar", "Semarang", "1530", "1915", "BUS", 200000, 20);
+	pushKA("Pramkes", "Solo", "0620", "0700", "EKO", 8000, 30);
+
 	login();
 	return 0;
 }
