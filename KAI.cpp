@@ -183,6 +183,7 @@ struct KeretaApi {
 	int kursi;
 };
 
+
 //Stack berisi kereta api
 struct StackKA {
 	int top;
@@ -380,7 +381,6 @@ void sortKA(int pil)
 		cout << tempKA.KeretaApi[i].kelas << "\t\t" << tempKA.KeretaApi[i].harga << "\t\t" << tempKA.KeretaApi[i].kursi << endl;
 	}
 	cout << "-------------------------------------------------------------------------------------------------------------" << endl;
-
 }
 
 //Mencari keberangkatan kereta sesuai stasiun tujuan
