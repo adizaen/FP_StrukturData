@@ -25,8 +25,9 @@ void cleanKA();
 void tampilKA();
 void sortKA(int pil);
 void searchKA();
+//void dataPenumpangKA()
 void booking();
-//string buatKodeBooking();
+string buatKodeBooking();
 void infoBooking();
 void batalBooking();
 
@@ -187,7 +188,7 @@ struct KeretaApi {
 //Stack berisi kereta api
 struct StackKA {
 	int top;
-	KeretaApi KeretaApi[max];
+	struct KeretaApi KeretaApi[max];
 }KA;
 
 //Inisiasi stack kereta api
@@ -576,9 +577,10 @@ void booking()
 					//Buat objek struct sebagai penyimpanan sementara yang nanti akan dipindah ke headBooking
 					KodeBooking *tempBooking = new KodeBooking; 
 
-					tempBooking->kodeBooking = "XL2411P"; //Generate kode booking
+					tempBooking->kodeBooking = buatKodeBooking(); //Generate kode booking
 					tempBooking->idKA = KA.KeretaApi[keberangkatan[pil - 1]].id; //Menyimpan idKA
 					tempBooking->kursiDipesan = jumlahKursi; //Menyimpan jumlah kursi
+					tempBooking->next_kodebooking = NULL;
 
 					//Output detail pemesanan tiket
 					cout << "\n";
@@ -611,6 +613,7 @@ void booking()
 						//Memindah posisi currPenumpang ke linked list selanjutnya dari objek penumpang
 						currPenumpang->next_penumpang = new DetailPenumpang;
 						currPenumpang = currPenumpang->next_penumpang;
+						currPenumpang->next_penumpang = NULL;
 					}
 
 					//Setelah selesai menginput semua ada maka tempBooking akan dipindah ke headBooking yaitu linked list utama
@@ -654,69 +657,21 @@ void booking()
 }
 
 //Membuat kode booking
-/*string buatKodeBooking()
+string buatKodeBooking()
 {
 	string kode;
 	char letter;
 
-	int posisi = B.top 0;
-	for (int angka = posisi; angka < posisi + 1; angka++)
+	const int MAX = 35;
+	char alphaNumeric[MAX] = { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+	
+	for(int i = 0; i < 6; i++)
 	{
-		for (int i = 0; i < 1; i++)
-		{
-			if (angka % 2 != 0 && angka <= 50)
-			{
-				if (angka <= 25)
-				{
-					letter = 'R';
-				}
-				else
-				{
-					letter = 'T';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 1) + static_cast<char>(letter + 2) + static_cast<char>(letter + 4) + to_string(angka + 13);
-			}
-			else if (angka % 2 == 0 && angka <= 50)
-			{
-				if (angka <= 25)
-				{
-					letter = 'S';
-				}
-				else
-				{
-					letter = 'P';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 3) + static_cast<char>(letter + 4) + static_cast<char>(letter + 7) + to_string(angka + 59);
-			}
-			else if (angka % 2 != 0 && angka > 50)
-			{
-				if (angka <= 75)
-				{
-					letter = 'M';
-				}
-				else
-				{
-					letter = 'K';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 1) + static_cast<char>(letter + 1) + static_cast<char>(letter + 3) + to_string(angka - 3);
-			}
-			else if (angka % 2 == 0 && angka > 50)
-			{
-				if (angka <= 25)
-				{
-					letter = 'J';
-				}
-				else
-				{
-					letter = 'G';
-				}
-				kode = static_cast<char>(letter) + to_string(angka + 3) + static_cast<char>(letter + 3) + static_cast<char>(letter + 6) + to_string(angka - 11);
-			}
-		}
+		kode = kode + alphaNumeric[rand() % MAX];
 	}
-
+	
 	return kode;
-}*/
+}
 
 //Mencari info kereta dan penumpang dari kode booking
 void infoBooking()
