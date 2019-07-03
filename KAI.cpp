@@ -193,7 +193,7 @@ void other()
 			break;
 		case 6:
 			cout << "Terimakasih telah menggunakan layanan KAI Access\n";
-			//exit(0);
+			exit(0);
 		default:
 			cout << "Maaf, angka yang anda inputkan tidak valid !" << endl;
 		}
@@ -740,13 +740,31 @@ void batalBooking()
 
 				if (pil == 'y' || pil == 'Y')
 				{
-					prevBooking->next_kodebooking = currBooking->next_kodebooking;
-					delete currBooking;
-					break;
+					KA.KeretaApi[currBooking->idKA].kursi = KA.KeretaApi[currBooking->idKA].kursi + currBooking->kursiDipesan;
+					if (currBooking == headBooking) {
+						if (headBooking->next_kodebooking != NULL) {
+							headBooking = headBooking->next_kodebooking;
+							delete currBooking;
+							break;
+						}
+						else {
+							delete currBooking;
+							headBooking = NULL;
+							break;
+						}
+					}
+					else {
+						prevBooking->next_kodebooking = currBooking->next_kodebooking;
+						delete currBooking;
+						currBooking = NULL;
+						break;
+					}
 				}
 			}
 			else
+			{
 				prevBooking = currBooking;
+			}
 		}
 	}
 	else
