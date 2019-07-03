@@ -17,7 +17,6 @@ struct KeretaApi {
 	int kursi;
 };
 
-
 //Stack berisi kereta api
 struct StackKA {
 	int top;
@@ -130,7 +129,7 @@ void admin()
 			cout << "Waktu Tiba                  : "; cin >> tiba;
 			cout << "Jenis Kelas [ EKS/BUS/EKO ] : "; cin >> kelas;
 			cout << "Harga                       : Rp "; cin >> harga;
-			cout << "Ketersediaan Kursi : "; cin >> kursi;
+			cout << "Ketersediaan Kursi          : "; cin >> kursi;
 			pushKA(namaka, tujuan, berangkat, tiba, kelas, harga, kursi);
 			break;
 		case 2:
@@ -159,11 +158,10 @@ void admin()
 			break;
 		case 9:
 			cout << "Terimakasih telah menggunakan layanan KAI Access\n";
-			//exit(0);
 		default:
 			cout << "Maaf, angka yang anda inputkan tidak valid !" << endl;
 		}
-	} while (pil != 8);
+	} while (pil != 9);
 }
 
 void other()
@@ -199,7 +197,7 @@ void other()
 		default:
 			cout << "Maaf, angka yang anda inputkan tidak valid !" << endl;
 		}
-	} while (pil != 5);
+	} while (pil != 6);
 }
 
 //Inisiasi stack kereta api
@@ -249,12 +247,18 @@ void pushKA(string nama, string tujuan, string berangkat, string tiba, string ke
 //Menghapus entry terakhir stack kereta api
 void popKA() {
 	if (isEmptyKA() != 1)
+	{
+		cout << "Jadwal kereta " << KA.KeretaApi[KA.top].nama << " berhasil dihapus!" << endl;
 		KA.top--;
+	}
+	else
+		cout << "\nMaaf, tidak ada data kereta api!";
 }
 
 //Mereset jadwal keberangkatan
 void cleanKA() {
 	KA.top = -1;
+	cout << "Reset jadwal berhasil, jadwal kereta kosong!\n";
 }
 
 //Menampilkan semua keberangkatan kereta api
@@ -275,7 +279,7 @@ void tampilKA()
 		cout << "-------------------------------------------------------------------------------------------------------------" << endl;
 	}
 	else
-		cout << "Tidak ada jadwal kereta api!\n\n";
+		cout << "Tidak ada jadwal kereta api!\n";
 }
 
 //Menyortir keberangkatan kereta menurut jadwal atau harga
@@ -302,6 +306,7 @@ void sortKA(int pil)
 	float harga[max];
 	int kursi[max];
 
+	//Sorting metode bubble sort
 	if (pil == 1)
 	{
 		for (int i = 1; i <= KA.top; i++)
@@ -309,7 +314,7 @@ void sortKA(int pil)
 			for (int j = 0; j <= KA.top - i; j++)
 			{
 				//Sorting berdasarkan keberangkatan terpagi
-				//Jadwal paling pagi diletakan paling atas( dari atas kebawah )
+				//Jadwal paling pagi diletakan paling atas( dari atas kebawah ) == ascending
 				if (tempKA.KeretaApi[j].berangkat < tempKA.KeretaApi[j + 1].berangkat)
 				{
 					//Proses pertukaran data
@@ -346,7 +351,7 @@ void sortKA(int pil)
 		{
 			for (int j = 0; j <= KA.top - i; j++)
 			{
-				//Sorting berdasarkan harga termurah
+				//Sorting berdasarkan harga termurah secara ascending dari harga termurah - termahal
 				if (tempKA.KeretaApi[j].harga < tempKA.KeretaApi[j + 1].harga)
 				{
 					nama[j] = tempKA.KeretaApi[j].nama;
@@ -565,8 +570,11 @@ void booking()
 			int jumlahKursi = 0;
 			do
 			{
-				cout << "Jumlah kursi yang anda pesan : ";
-				cin >> jumlahKursi; //Input jumlah kursi yang ingin dipesan
+				do
+				{
+					cout << "Jumlah kursi yang anda pesan  [ Max 3 ] : ";
+					cin >> jumlahKursi; //Input jumlah kursi yang ingin dipesan
+				} while (jumlahKursi <= 0 || jumlahKursi > 3);
 
 				if (jumlahKursi > 0 && jumlahKursi < KA.KeretaApi[keberangkatan[pil - 1]].kursi)
 				{
@@ -637,12 +645,12 @@ void booking()
 					cout << "Total bayar\t: Rp " << total << endl;
 					do
 					{
-						cout << "Dibayar\t: Rp "; cin >> bayar;
+						cout << "Dibayar\t\t: Rp "; cin >> bayar;
 						if (bayar < total)
 							cout << "Maaf, uang yang dibayarkan tidak cukup !" << endl;
 						else
 						{
-							cout << "Kembali\t: Rp " << bayar - total << endl;
+							cout << "Kembali\t\t: Rp " << bayar - total << endl;
 							cout << "\n------------------------------------------------" << endl;
 							cout << "STATUS : Pemesanan tiket berhasil!" << endl;
 							KA.KeretaApi[headBooking->idKA].kursi = KA.KeretaApi[headBooking->idKA].kursi - jumlahKursi;
@@ -753,9 +761,10 @@ int main()
 	headBooking = NULL;
 
 	//Default entry
-	pushKA("Lodaya", "Bandung", "1820", "0512", "EKS", 250000, 25);
-	pushKA("Joglosemar", "Semarang", "1530", "1915", "BUS", 200000, 20);
-	pushKA("Pramkes", "Solo", "0620", "0700", "EKO", 8000, 30);
+	pushKA("Lodaya/7075", "Bandung", "18.20", "23.12", "EKS", 200000, 25);	
+	pushKA("Gajahwong/165", "Gambir", "15.30", "19.15", "BUS", 270000, 20);
+	pushKA("Bengawan/9091", "Kroya", "06.20", "09.00", "EKO", 80000, 30);
+	pushKA("Ranggajati/190", "Kroya", "17.15", "20.08", "EKO", 120000, 15);
 
 	login();
 	return 0;
