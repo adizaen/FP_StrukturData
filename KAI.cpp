@@ -122,7 +122,7 @@ void admin()
 			searchKA();
 			break;
 		case 7:
-			//data_penumpang();
+			//dataPenumpangKA();
 			break;
 		case 8:
 			login();
@@ -556,14 +556,13 @@ void booking()
 			cout << "\nNomor yang anda pilih : ";
 			cin >> pil;
 
-			if (keberangkatan[pil] == NULL) {
+			if (pil < 0 || pil > totalKeberangkatan) {
 				cout << "Maaf, pilihan tidak valid !" << endl;
-				pil = NULL;
 			}
-		} while (pil == NULL);
+		} while (pil < 0 || pil > totalKeberangkatan);
 
 		//Memesan tiket booking sesuai pilihan
-		if (pil != NULL)
+		if (pil > 0 || pil < totalKeberangkatan)
 		{
 			cout << "\nAnda memilih kereta api " << KA.KeretaApi[keberangkatan[pil - 1]].nama << " dengan tujuan " << KA.KeretaApi[keberangkatan[pil - 1]].tujuan << endl;
 			int jumlahKursi = 0;
@@ -575,13 +574,13 @@ void booking()
 				if (jumlahKursi > 0 && jumlahKursi < KA.KeretaApi[keberangkatan[pil - 1]].kursi)
 				{
 					//Buat objek struct sebagai penyimpanan sementara yang nanti akan dipindah ke headBooking
-					KodeBooking *tempBooking = new KodeBooking; 
+					KodeBooking *tempBooking = new KodeBooking;
 
 					tempBooking->kodeBooking = buatKodeBooking(); //Generate kode booking
 					tempBooking->idKA = KA.KeretaApi[keberangkatan[pil - 1]].id; //Menyimpan idKA
 					tempBooking->kursiDipesan = jumlahKursi; //Menyimpan jumlah kursi
 					tempBooking->next_kodebooking = NULL;
-
+					
 					//Output detail pemesanan tiket
 					cout << "\n";
 					cout << "------------------------------------------------" << endl;
@@ -596,7 +595,7 @@ void booking()
 					cout << "Waktu Tiba\t: " << KA.KeretaApi[tempBooking->idKA].tiba << endl;
 					cout << "Kelas\t\t: " << KA.KeretaApi[tempBooking->idKA].kelas << endl;
 					cout << "------------------------------------------------" << endl;
-					
+
 					//Buat objek struct yang akan menyimpan posisi pembacaan dari struct penumpang yang ada pada tempBooking
 					DetailPenumpang *currPenumpang = new DetailPenumpang;
 					//Inisiasi objek struct penumpang yang ada pada tempBooking
@@ -617,13 +616,14 @@ void booking()
 					}
 
 					//Setelah selesai menginput semua ada maka tempBooking akan dipindah ke headBooking yaitu linked list utama
-					if (headBooking == NULL) { //Jika headBooking kosong maka akan langsung dipindah
-						headBooking = new KodeBooking;
+					if (headBooking != NULL) { //Jika headBooking kosong maka akan langsung dipindah
+						cout << headBooking;
+						headBooking->next_kodebooking = new KodeBooking;
+						headBooking->next_kodebooking = headBooking;
 						headBooking = tempBooking;
 					}
 					else { //Jika tidak maka headBooking akan dipindah ke headBooking->next_kodebooking dan headBooking akan diisi tempBooking
-						headBooking->next_kodebooking = new KodeBooking;
-						headBooking->next_kodebooking = headBooking;
+						cout << headBooking;
 						headBooking = tempBooking;
 					}
 
@@ -752,7 +752,9 @@ int main()
 {
 	initKA();
 	SetConsoleTitle(TEXT("KAI ACCESS STASIUN TUGU YOGYAKARTA"));
-
+	
+	headBooking = NULL;
+	
 	//Default entry
 	pushKA("Lodaya", "Bandung", "1820", "0512", "EKS", 250000, 25);
 	pushKA("Joglosemar", "Semarang", "1530", "1915", "BUS", 200000, 20);
